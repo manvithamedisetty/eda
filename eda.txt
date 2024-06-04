@@ -1,0 +1,83 @@
+#Data Loading and Cleaning
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder as lb
+from sklearn.model_selection import train_test_split
+df = pd.read_csv("C:/Users/91905/Downloads/retail_sales_dataset.csv")
+print(df.head())
+df.info()
+df.describe()
+df.isnull().sum()
+df['Date'] = pd.to_datetime(df['Date'])
+
+#Descriptive statistics
+mean_amount = df['Total Amount'].mean()
+median_amount = df['Total Amount'].median()
+mode_amount = df['Total Amount'].mode()[0]
+std_amount = df['Total Amount'].std()
+
+print(f"Mean Total Amount: {mean_amount}")
+print(f"Median Total Amount: {median_amount}")
+print(f"Mode Total Amount: {mode_amount}")
+print(f"Standard Deviation of Total Amount: {std_amount}")
+
+#Time Series Analysis
+# Plot Total Amount over time
+plt.figure(figsize=(12, 6))
+plt.plot(df['Date'], df['Total Amount'], label='Total Amount')
+plt.xlabel('Date')
+plt.ylabel('Total Amount')
+plt.title('Total Amount Trends Over Time')
+plt.legend()
+plt.show()
+
+# Resampling data for monthly trends
+monthly_sales = df.set_index('Date').resample('M').sum()
+
+plt.figure(figsize=(12, 6))
+plt.plot(monthly_sales.index, monthly_sales['Total Amount'], label='Monthly Total Amount')
+plt.xlabel('Date')
+plt.ylabel('Total Amount')
+plt.title('Monthly Total Amount Trends')
+plt.legend()
+plt.show()
+
+#Customer and Product Analysis
+customer_data = df.groupby('Customer ID').agg({
+    'Total Amount': 'sum',
+    'Product Category': 'count',
+    'Age': 'mean'
+}).rename(columns={'Total Amount': 'Total Amount', 'Product Category': 'num_products', 'Age  ': 'average_age'})
+
+print(customer_data.describe())
+
+#Product analysis
+product_data = df.groupby('Product Category').agg({
+    'Total Amount': 'sum',
+    'Customer ID': 'count'
+}).rename(columns={'Total Amount': 'Total Amount', 'Customer ID': 'num_customers'})
+
+print(product_data.describe())
+
+#Visualization
+#bar chart
+category_sales = df.groupby('Product Category')['Total Amount'].sum().sort_values()
+
+plt.figure(figsize=(12, 6))
+sns.barplot(x=category_sales.index, y=category_sales.values)
+plt.xlabel('Product Category')
+plt.ylabel('Total Amount')
+plt.title('Total Sales by Product Category')
+plt.xticks(rotation=90)
+plt.show()
+
+#line plot
+plt.figure(figsize=(12, 6))
+plt.plot(df['Date'], df['Total Amount'], label='Total Amount')
+plt.xlabel('Date')
+plt.ylabel('Total Amount')
+plt.title('Total Amount Trends Over Time')
+plt.legend()
+plt.show()
